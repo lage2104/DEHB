@@ -26,7 +26,8 @@ class DEHBBase:
     def __init__(self, cs=None, f=None, dimensions=None, mutation_factor=None,
                  crossover_prob=None, strategy=None, min_budget=None,
                  max_budget=None, eta=None, min_clip=None, max_clip=None,
-                 boundary_fix_type='random', max_age=np.inf, **kwargs):
+                 boundary_fix_type='random', max_age=np.inf, ns_scale=1,
+                 **kwargs):
         # Benchmark related variables
         self.cs = cs
         self.configspace = True if isinstance(self.cs, ConfigSpace.ConfigurationSpace) else False
@@ -44,6 +45,7 @@ class DEHBBase:
         self.strategy = strategy
         self.fix_type = boundary_fix_type
         self.max_age = max_age
+        self.ns_scale = ns_scale
         self.de_params = {
             "mutation_factor": self.mutation_factor,
             "crossover_prob": self.crossover_prob,
@@ -133,7 +135,7 @@ class DEHBBase:
         budgets = self.budgets[(-s-1):]
         # number of configurations in that bracket
         n0 = int(np.floor((self.max_SH_iter)/(s+1)) * self.eta**s)
-        ns = [max(int(n0*(self.eta**(-i))), 1) for i in range(s+1)]
+        ns = [max(int(n0*(self.eta**(-i))) * self.ns_scale, 1) for i in range(s+1)]
         if self.min_clip is not None and self.max_clip is not None:
             ns = np.clip(ns, a_min=self.min_clip, a_max=self.max_clip)
         elif self.min_clip is not None:
